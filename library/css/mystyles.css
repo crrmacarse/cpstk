@@ -1,0 +1,21 @@
+.top-buffer
+{
+	margin-top: 30px;
+}
+
+.features {
+  overflow: hidden;
+  position: relative;
+}
+
+.bottom-right{
+	position: absolute;
+	bottom: 3%;
+	right: 5%;
+}
+
+.button-manage-group
+{
+	 margin-top: 3% !important;
+}
+

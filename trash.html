@@ -1,0 +1,1768 @@
+<?php
+
+session_start();
+
+include('connection.php');
+include ('../functions/functions.php');
+include('../functions/checkSession.php');
+$db = new db();
+
+$form_CSCID = $_POST['CSCID'];
+$form_FILE = $_FILES['FILE'];
+
+if (isset($form_FILE)) {
+           
+    $filename = $_FILES["FILE"]["tmp_name"];
+ 	$row = 1;
+
+ 	$file = fopen($filename, "r");
+
+ 	while (($getData = fgetcsv($file, 10000, ",")) !== FALSE)
+     {
+     	if($row == 1){ $row++; continue; }
+        $row++; 
+
+
+        if($form_CSCID == ""){
+					die("error: Please Select a Class Schedule First");
+	         	}
+
+        $checkUsername = $db->connection->prepare("SELECT * FROM ClassScheduleData WHERE CSDStudentYear = ? AND idClassScheduleControl = ?");
+		$checkUsername->bindParam(1,$getData['0']);
+		$checkUsername->bindParam(2,$form_CSCID);
+		$checkUsername->execute();
+
+		if ($checkUsername->rowCount() < 0){
+     		die("error: Student Already exist");
+			}
+
+       $sql = "INSERT INTO ClassScheduleData
+			(idClassScheduleControl, CSDStudentIDCode, CSDFinalGrade, CSDRemarks, CSDStudentYear, CSDStudentCourse, CSDStudentCollege, CSDPeriod, CSDDateCreated, CSDStatus)
+           values ($form_CSCID,'".$getData[0]."','".$getData[1]."','".$getData[2]."','".$getData[3]."','".$getData[4]."','".$getData[5]."','".$getData[6]."',GETDATE(),1)";
+         	$result = $db->connection->query($sql);
+
+	if(!isset($result))
+			{
+				die("error: Import Failed: Database Query Conflict");
+			}
+     } 
+
+	fclose($file);
+
+	echo 'success: Successfully Imported';	
+    
+} else {
+	echo 'error: Import Failed.';
+
+};
+
+?>
+
+
+
+
+<!DOCTYPE html>
+<html lang="en-US">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<body>
+
+<div ng-app="">
+  <p>Name : <input type="text" ng-model="name"></p>
+  <h1>Hello {{name}}</h1>
+</div>
+
+</body>
+</html>
+
+<div class="alert alert-warning alert-dismissible fade show" role="alert" ng-show="errorMsg">
+							  <i class="fas fa-hand-paper"></i>&nbsp;&nbsp;{{errorMsg}}
+						  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						    <span aria-hidden="true">&times;</span>
+						  </button>
+						</div>
+
+						<?php
+	
+	include ('library/form/connection.php');
+	
+	
+	foreach ($results as $row) {
+		echo $row['ULastName'];
+		echo '<br>';
+	}
+
+?>
+
+<!DOCTYPE html>
+<html lang="en-US">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<body>
+
+<div ng-app="">
+  <p>Name : <input type="text" ng-model="name"></p>
+  <h1>Hello {{name}}</h1>
+</div>
+
+</body>
+</html>
+
+<div class="alert alert-warning alert-dismissible fade show" role="alert" ng-show="errorMsg">
+							  <i class="fas fa-hand-paper"></i>&nbsp;&nbsp;{{errorMsg}}
+						  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						    <span aria-hidden="true">&times;</span>
+						  </button>
+						</div>
+
+
+<?php
+
+	session_start();
+	include('library/form/connection.php');
+	include('library/functions/functions.php');
+	$db = new db();
+
+	if(!isset($_SESSION['USER_USERNAME']))
+	 {
+		echo '<html style="awidth: 100%; height: 100%; margin: 0px; padding: 0px;"> <head> <title>Page not Availble</title><link rel="icon" href="img/favicon.ico"></head> <body style="width: 100%; height: 100%; margin: 0px; padding: 0px; text-align: center; background-color: #454551; color: lightgray;"> <div style="width: 100%; height: 100%; margin: 0px; padding: 0px; vertical-align: middle; display: table;"> <div style="width: 100%; height: 100%; margin: 0px; padding: 0px; vertical-align: middle; display: table-cell;"> 
+
+            <h1><a href = "https://www.google.com.ph/search?q=get+a+life&rlz=1C1GCEA_enPH782PH782&oq=get+a+life&aqs=chrome..69i57.1191j0j1&sourceid=chrome&ie=UTF-8" style = "font-size: 50px; color: lightgray; text-decoration:none;"> 403 Forbidden</a></h1> <h4>Un-authorized Access</h4> </div> </div> </body> </html>';
+        exit;
+	}
+
+		$search = isset($_GET['search']) ? $_GET['search'] : '';
+	$limit = 10;
+
+
+	$total_count = $db->connection->query('SELECT COUNT(*) FROM Users')->fetchColumn(); 
+	$total_page = ceil($total_count/$limit);
+
+	$page = isset($_GET['page']) && $_GET['page'] > 0 && $_GET['page'] <= $total_page ? $_GET['page'] : '1';
+	$offset = ($page * $limit) - $limit;
+
+	if($page < 2) {
+		$disable_previous = 'disabled text-muted';
+		$disable_previous2 = 'pointer-events: none;';
+		$bottom_page = 'display:none';
+	}
+	else {
+		$disable_previous = '';
+		$disable_previous2 = '';
+		$bottom_page = '';
+	}
+	if($total_page < 2) {
+		$top_page = 'display:none';
+	}
+	else {
+		$top_page = '';
+	}
+	if($total_page == $page || $total_page < 1) {
+		$disable_next = 'disabled text-muted';
+		$disable_next2 = 'pointer-events: none;';
+		$top_page = 'display:none';
+	}
+	else {
+		$disable_next = '';
+		$disable_next2 = '';
+		$top_page = '';
+	}
+?>
+
+<!doctype html>
+<html lang="en">
+	
+	<head>
+	
+	   	<meta charset="utf-8">
+    	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<title>CPU Smart Touch Information Kiosk</title>
+
+		<link href = "library/css/bootstrap.min.css" rel = " stylesheet">
+		<link href = "library/css/mystyles.css" rel = "stylesheet">
+		
+	</head>
+
+<body>
+
+<body>
+	
+	<!-- Modal -->
+	<div class="modal fade" id="loadAccounts" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalLabel">Load Grade</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	         <form class="form-horizontal" action="library/form/frmLoadAccount.php" method="post" name="upload_excel" enctype="multipart/form-data">
+	         <div class="input-group mb-3">
+				  <div class="input-group-prepend">
+				    <span class="input-group-text">Upload</span>
+				  </div>
+				  <div class="custom-file">
+				    <input type="file" class="custom-file-input" name = "FILE" id = "fileupload" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+				    <label class="custom-file-label" for="fileupload">Choose file</label>
+				  </div>
+				</div>
+                      
+	      </div>
+	      <div class="modal-footer">
+	        <input type="submit" class="btn btn-success" name = "Import" data-loading-text = "Importing.." value = "Import">
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+	      </div>
+	  </form>
+	    </div>
+	  </div>
+	</div>
+
+	<div class="container">
+			<div class = "row top-buffer">
+				<div class = "col-lg-6">
+					<h1 class = "h1">Accounts Management</h1>
+					<p class = "text-muted">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc non mauris vitae dui lacinia cursus eget eu urna.</p>
+				</div>
+				
+				<div class = "col-lg-6">
+					<div class = "float-right button-manage-group">
+						<a href = "dms.php" class="btn btn-info"><i class="fas fa-arrow-left"></i>&nbsp; Return</a>
+						<span class="dropdown">
+						  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						    Actions
+						  </button>
+						  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+						    <a class="dropdown-item" href="#">Add Data</a>
+						    <a class="dropdown-item" href="#loadAccounts" data-toggle="modal">Load Data</a>
+						    <a class="dropdown-item" href="mailto:customercare@coffeebreak.ph?Subject=Coffeebreak%20Careers" target="_top">Report</a>
+						  </div>
+						</span>
+					</div>
+				</div>
+			</div>
+		
+		<div class = "row">
+			<div class = "col-lg-12">
+						<hr class="my-4 float-right" width="65%">
+			</div>
+			<div class = "col-lg-8">
+			</div>
+			<div class = "col-lg-4">
+				<div class = "input-group">
+				<input type = "text" id = "searchBar" class = "form-control" placeholder="Search">
+				&nbsp;
+				<button id = "gradeSearch" class = "btn btn-success">Search</button>
+				</div>
+			</div>
+		</div>
+
+		<div class = "row top-buffer">
+				<table class="table table-striped">
+				  <thead>
+					<tr>
+					  <th scope="col">ID</th>
+					  <th scope="col">Username</th>
+					  <th scope="col">Lastname</th>
+					  <th scope="col">Firstname</th>
+					  <th scope="col">Middlename</th>
+					  <th scope="col">Year Level</th>
+					  <th scope="col">Guardian Fullname</th>					  					  
+					  <th scope="col">Actions</th>
+					</tr>
+				  </thead>
+				  <tbody id = "accountList">
+				  </tbody>
+				</table>
+			
+		</div>
+
+		<div class = "row top-buffer justify-content-md-center">
+		<div class="col-md-auto top-buffer">
+			<nav aria-label="Page navigation example">
+			  <ul class="pagination justify-content-center">
+			    <li class="page-item disabled">
+			      <a class="page-link" href="#" tabindex="-1">Previous</a>
+			    </li>
+			    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+			    <li class="page-item"><a class="page-link" href="#">2</a></li>
+			    <li class="page-item"><a class="page-link" href="#">3</a></li>
+			    <li class="page-item">
+			      <a class="page-link" href="#">Next</a>
+			    </li>
+			  </ul>
+			</nav>
+		</div>
+		</div>
+	</div>
+	
+		 
+	
+	
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="http://malsup.github.com/jquery.form.js"></script>
+  <script src = "library/js/app.js"></script>	
+  <script src="library/js/messagealert.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
+</body>
+	
+	
+</html>
+
+<script>
+
+$(document).ready(function(){
+		$("#paginationActive<?php echo $page ?>").addClass("active");
+		$("#gradeSearch").val('<?php echo $search; ?>');
+		$("#gradeSearch").click(function(){
+			this.value = '';
+			 $( "#searchBar" ).click(function() {
+			  jQuery('#gradeSearch').empty();
+			  var searchValue = $("#gradeSearch").val().toLowerCase(); 
+				window.location.href='manage-grades.php?search='+searchValue;
+				 
+				});
+
+				$('#gradeSearch').keypress(function(e){
+				if(e.which == 13){//Enter key pressed
+					$('#searchBar').click();//Trigger search button click event
+				}
+			});
+		});
+	});
+
+
+	var PageComponent = {
+        accountList: document.getElementById('accountList')
+    };
+
+    function addAccountList(id, username, firstname, middlename, lastname, yearlevel, course, guardian, status)
+	{
+		PageComponent.accountList.innerHTML = PageComponent.accountList.innerHTML +
+			'<thead>'+
+			'<tr id = "account_'+ id +'">'+
+			'	<td scope = "col" id = "account_USERNAME_' + id +'">' + username + '</td>'+
+			'	<td scope = "col" id = "account_LASTNAME_' + id + '">' + lastname + '</td>'+
+			'	<td scope = "col" id = "account_FIRSTNAME_' + id + '">' + firstname + '</td>'+
+			'	<td scope = "col" id = "account_MIDDLENAME' + id + '">' + middlename + '</td>'+
+			'	<td scope = "col" id = "account_YEARLEVEL_' + id + '">' + yearlevel + '</td>'+
+			'	<td scope = "col" id = "account_GUARDIAN_' + id + '">' + guardian + '</td>'+
+			'	<td scope = "col" id = "account_GUARDIAN_' + id + '">' + status + '</td>'+
+			' 	<td><button id="grade_BTNUPDATE_' + id + '" value="' + id + '" data-target = "#updateGradeForm_MODAL" data-toggle = "modal" onclick = "updateMenuFill(\'' + id + '\')"class="btn btn-primary">Update</button></td>'+
+			'</tr>'+	
+			'</thead>';
+	}
+
+	<?php 
+
+	$list_sql = 'WITH OrderedList AS
+				(
+				SELECT 
+				Users.idUser, 
+				Users.UPassword, 
+				Users.idUsername,
+				UserType.UTName, 
+				Users.UFirstName, 
+				Users.UMiddleName, Users.ULastName, Users.UGuardianName, Users.ULevel, Course.CName, Department.DName, Users.UStatus,
+				ROW_NUMBER() OVER (ORDER BY Users.idUser) AS "RowNumber"
+
+
+				FROM UserType
+
+				LEFT JOIN Users
+				ON UserType.idUserType = Users.idUserType
+				LEFT JOIN Course
+				ON Users.idCourse = Course.idCourse
+				LEFT JOIN Department
+				ON Department.idDepartment = Course.idDepartment
+				)
+				SELECT * 
+				FROM OrderedList 
+				WHERE RowNumber BETWEEN '. $offset.' AND '. $limit;
+	
+	$list_getResult = $db->connection->prepare($list_sql);
+	$list_getResult->execute();
+	$list_count = $list_getResult->RowCount();
+
+	if($list_count > 0){
+		?>
+			
+
+			var content = '<tr>'+
+			'<tr>'+
+			'<td id = "grades_TITLE_">No Grades Found</td>'+
+			'<tr>';
+
+			$("#gradelist").append(content);
+
+		<?php
+	}
+	else
+	{
+
+		foreach($list_getResult as $list_row)
+		{
+			$result_ID = htmlspecialchars($list_row['idUser']); 
+			$result_FIRSTNAME = htmlspecialchars($list_row['UFirstName']);
+			$result_USERNAME = htmlspecialchars($list_row['idUsername']);
+			$result_MIDDLENAME = htmlspecialchars($list_row['UMiddleName']);
+			$result_LASTNAME = htmlspecialchars($list_row['ULastName']);
+			$result_YEARLEVEL = htmlspecialchars($list_row['ULevel']);
+			$result_COURSE = htmlspecialchars($list_row['CName']);
+			$result_GUARDIANNAME = htmlspecialchars($list_row['UGuardianName']);
+			$result_STATUS = htmlspecialchars($list_row['UStatus']);
+
+		if($result_STATUS == '1')
+		{
+			$result_STATUS = 'Active';
+		}
+		else
+		{
+			$result_STATUS = 'Inactive';
+		}
+	?>
+
+	addAccountList("<?php echo $result_ID; ?>","<?php echo $result_USERNAME; ?>","<?php echo $result_FIRSTNAME; ?>","<?php echo $result_MIDDLENAME; ?>", "<?php echo $result_LASTNAME; ?>","<?php echo $result_YEARLEVEL; ?>" ,"<?php echo $result_COURSE; ?>","<?php echo $result_GUARDIANNAME; ?>","<?php echo $result_STATUS; ?>");
+		
+		<?php 
+		}			
+	}
+	?>
+</script>
+
+<?php
+/*
+ *__________________________________________________________________________________________________________
+ *
+ * TITLE: 			Menu Add
+ * DESCRIPTION: 	Code for adding new menu
+ *__________________________________________________________________________________________________________
+ *
+ * RETURN KEYWORDS:
+ *
+ * success: *message for success*	-> 	If encoded successfully
+ * error: *message for error* 	-> 	If encoded unsuccessfully
+ *__________________________________________________________________________________________________________
+ *
+ * VARIABLES:
+ *
+ * $_POST['NAME'];
+ * $_POST['GROUP'];
+ * $_POST['RECOMMENDATION'];
+ * $_POST['DESCRIPTION'];
+ * $_POST['IMAGE'];
+
+ *
+ *__________________________________________________________________________________________________________
+ *
+ * Note: you can send a custom message by typing keywords 'msg:', 'success:', 'error:', and 'warning:' 
+ *		 followed by your message. Just make sure that there are no printed or echoed before the keyword.
+ *__________________________________________________________________________________________________________
+ *
+ */
+ 
+session_start();
+include('../form/connection.php');
+$db = new db();
+
+$form_UPLOADER = $_SESSION['USER_ID'];
+$form_NAME = $db->connection->real_escape_string($_POST['NAME']);
+$form_GROUP = $db->connection->real_escape_string($_POST['GROUP']);
+$form_RECOMMENDATION = $db->connection->real_escape_string($_POST['RECOMMENDATION']);
+$form_DESCRIPTION = $db->connection->real_escape_string($_POST['DESCRIPTION']);
+$form_IMAGE = '';
+
+	function getextension($str) {
+		 $i = strrpos($str,".");
+		 if (!$i) { return ""; }
+		 $l = strlen($str) - $i;
+		 $ext = substr($str,$i+1,$l);
+		 return $ext;
+	}
+
+
+	if(isset($_FILES['IMAGE']['name'])){
+		
+		if(!$_FILES['IMAGE']['error'])
+		{
+				$new_file_name = stripslashes($_FILES['IMAGE']['name']);
+				$extension = strtolower(getextension($new_file_name));
+
+				if (($extension != "jpg") && ($extension != "jpeg") && ($extension != "png") && ($extension != "gif") ){
+					die('error: Image file types only');
+				}
+
+				if($_FILES['IMAGE']['size'] > (200000)){
+					$valid_file = false;
+					echo('error: Your file\'s size is to large.');
+				}else{
+					$valid_file = true;
+				}
+
+				if($valid_file){
+					$form_IMAGE =md5(date("ymdHis")).'.'.$extension;
+					$path='../../img/menu/';
+					$newname=$path.$form_IMAGE;
+
+					move_uploaded_file($_FILES['IMAGE']['tmp_name'],$newname);
+
+						$sql_MENU = "INSERT INTO product_item
+						(GROUPID,NAME,DESCRIPTION,IMAGE,recommendation, STATUS, ADDEDBY)
+						VALUES
+						(
+						$form_GROUP, 
+						'$form_NAME', 
+						'$form_DESCRIPTION',
+						'$form_IMAGE',
+						'$form_RECOMMENDATION',
+						1,
+						$form_UPLOADER
+						)";
+
+					if($db->connection->query($sql_MENU))
+					{
+						$sql_id = $db->connection->insert_id;
+						echo 'success:  ' . $sql_id . ',' . $form_IMAGE;	
+					}
+					else 
+					{
+						echo 'error: Error in adding menu';
+
+					}
+
+				}
+
+			}
+			else
+			{
+				echo 'warning: There is an error in adding';
+
+			}
+		}
+		else
+		{
+			echo 'msg: Image not found';
+		}
+?>
+
+<?php
+	
+	session_start();
+	include('library/form/connection.php');
+	$db = new db();
+
+	if(isset($_SESSION['USER_USERNAME']) and isset($_SESSION['USER_GROUPID']))
+	{
+		if($_SESSION['USER_GROUPID'] !=  '1' AND $_SESSION['USER_GROUPID'] != '2')
+		{
+			
+        echo '<html style="awidth: 100%; height: 100%; margin: 0px; padding: 0px;"> <head> <title>Page not Availble</title><link rel="icon" href="img/favicon.ico"></head> <body style="width: 100%; height: 100%; margin: 0px; padding: 0px; text-align: center; background-color: #454551; color: lightgray;"> <div style="width: 100%; height: 100%; margin: 0px; padding: 0px; vertical-align: middle; display: table;"> <div style="width: 100%; height: 100%; margin: 0px; padding: 0px; vertical-align: middle; display: table-cell;"> 
+
+            <h1><a href = "https://www.google.com.ph/search?q=get+a+life&rlz=1C1GCEA_enPH782PH782&oq=get+a+life&aqs=chrome..69i57.1191j0j1&sourceid=chrome&ie=UTF-8" style = "font-size: 50px; color: lightgray; text-decoration:none;"> 403 Forbidden</a></h1> <h4> u got access denied boi</h4> </div> </div> </body> </html>';
+        exit;
+   
+		}
+	}
+	else {
+		echo '<html style="awidth: 100%; height: 100%; margin: 0px; padding: 0px;"> <head> <title>Page not Availble</title><link rel="icon" href="img/favicon.ico"></head> <body style="width: 100%; height: 100%; margin: 0px; padding: 0px; text-align: center; background-color: #454551; color: lightgray;"> <div style="width: 100%; height: 100%; margin: 0px; padding: 0px; vertical-align: middle; display: table;"> <div style="width: 100%; height: 100%; margin: 0px; padding: 0px; vertical-align: middle; display: table-cell;"> 
+
+            <h1><a href = "https://www.google.com.ph/search?q=get+a+life&rlz=1C1GCEA_enPH782PH782&oq=get+a+life&aqs=chrome..69i57.1191j0j1&sourceid=chrome&ie=UTF-8" style = "font-size: 50px; color: lightgray; text-decoration:none;"> 403 Forbidden</a></h1> <h4>  u got access denied boi</h4> </div> </div> </body> </html>';
+        exit;
+	}
+
+	$search = isset($_GET['search']) ? $_GET['search'] : '';
+	$limit = 12;
+
+	$total_sql = 'SELECT * FROM product_item WHERE NAME LIKE "%'.$search.'%"';
+	$total_result = $db->connection->query($total_sql);
+	$total_count = mysqli_num_rows($total_result);
+	$total_page = ceil($total_count/$limit);
+
+	$page = isset($_GET['page']) && $_GET['page'] > 0 && $_GET['page'] <= $total_page ? $_GET['page'] : '1';
+	$offset = ($page * $limit) - $limit;
+	
+
+	if($page < 2) {
+		$disable_previous = 'disabled';
+		$disable_previous2 = 'pointer-events: none; color: #6c7585;';
+	}
+	else {
+		$disable_previous = '';
+		$disable_previous2 = '';
+	}
+
+	if($total_page == $page || $total_page < 1) {
+		$disable_next = 'disabled';
+		$disable_next2 = 'pointer-events: none; color: #6c7585;';
+	}
+	else {
+		$disable_next = '';
+		$disable_next2 = '';
+	}
+
+
+	?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Coffeebreak Caf&eacute; International Inc. | Manage Menu</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="library/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	 
+    <!-- Custom fonts for this template -->
+    <link href="library/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Cabin:700' rel='stylesheet' type='text/css">
+
+    <!-- Custom styles for this template -->
+	
+    <link href="css/grayscale.min.css" rel="stylesheet">
+	<link href="css/mystyles.css" rel="stylesheet">
+
+  </head>
+	
+	
+	<!-- Add Menu Modal -->
+	 <div class="modal fade" id="addMenuForm_MODAL" role="dialog">
+		<div class="modal-dialog">
+			<form id="addMenuForm" method="post" action="library/form/addMenuForm.php">
+		  <!-- Modal content-->
+		  <div class="modal-content">
+			<div class="modal-header">
+				<h5>Upload a Menu</h5>
+			</div>
+			<div class="modal-body">
+				
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text" id="inputGroup-sizing-sm">Name</span>
+							  </div>
+							  <input id = "addMenuForm_NAME" name = "NAME" type="text" class="form-control" placeholder="NAME" aria-describedby="sizing-addon2" required>
+						</div>
+						<br />
+						<div class="form-group">
+						  <select class="form-control" name = "GROUP" id = "addMenuForm_GROUP" >
+							<option value="" disabled selected>Select a group</option>
+							<?php 
+							  
+							  	$groupList_sql = "SELECT product_group.ID, product_group.NAME, 							product_group.STATUS 
+												
+												FROM product_group
+												
+												WHERE product_group.STATUS = 1";
+							  
+							  	$groupList_result = $db->connection->query($groupList_sql);
+							  	$groupList_count = mysqli_num_rows($groupList_sql);
+							  	
+							  	while($groupList_row = $groupList_result->fetch_array())
+								{
+									?>
+							  			<option value = "<?php echo $groupList_row['ID']; ?>"><?php echo $groupList_row['NAME']; ?></option>
+							  <?php
+								}
+							  ?>
+							
+						  </select>
+						</div>
+						<div class="form-group">
+						  <select class="form-control" name = "RECOMMENDATION" id="addMenuForm_RECOMMENDATION">
+							<option value="" disabled selected>Select a Recommendation</option>
+							<option value = "">None</option>
+							<option value = "New">New</option>
+							<option value = "Best Seller">Best Seller</option>
+							<option value = "Recommended">Recommended</option>
+						  </select>
+						</div>
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text" id="inputGroup-sizing-sm">Description</span>
+							  </div>
+							  <textarea id = "addMenuForm_DESCRIPTION" maxlength = "180" name = "DESCRIPTION" style = "padding-bottom: 150px;" type="text" class="form-control" placeholder="Description.." aria-describedby="sizing-addon2" required></textarea>
+						</div>
+						<br />
+						  <input type = "image" class = "IMGDISPLAY" id = "addMenuForm_IMAGEDISPLAY" width="300"></input>	
+						  <input id = "addMenuForm_IMAGE" type = "file" accept="image/*"  name = "IMAGE" class = "form-control-file" value = ""></input>
+						  <br />
+						  <small>Dimension: Width: 400 - 500| Height: 400 - 500 | Size: 150kb maximum</small>
+				</div>
+					<div class="modal-footer">
+						<button type="submit" id="addMenuForm_SUBMIT" class="btn btn-primary" data-loading-text="Adding..."> Add</button>
+						 <button type="button" class="btn btn-default" data-dismiss="modal"></span> Close</button>
+					</div>
+			  </div>
+			</form>
+		</div>
+  	</div>
+	
+	<!-- Update Menu Modal -->
+	<div class="modal fade" id="updateMenuForm_MODAL" tabindex="-1" role="dialog">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5>Update Menu</h5>
+				</div>
+
+				<!-- Update Barangay Form -->
+				<form id="updateMenuForm" method="post" action="library/form/updateMenuForm.php">
+					<div class="modal-body">
+						<input type="hidden" id="updateMenuForm_ID" name="ID" required />
+						<!-- Infomation -->
+						<div class="panel panel-default">
+							<div class="panel-heading pull-right"><b>Information</b></div>
+							<div class="panel-body">
+
+								<!-- Name -->
+								<div class="input-group">
+									<div class="input-group-prepend">
+										<span class="input-group-text" id="inputGroup-sizing-sm">Name</span>
+									  </div>
+									  <input id = "updateMenuForm_NAME" name = "NAME" type="text" class="form-control" placeholder="NAME" aria-describedby="sizing-addon2" required>
+								</div>
+								<br />
+								<div class="form-group">
+								  <select class="form-control" name = "GROUP" id = "updateMenuForm_GROUP" >
+									<option value="" disabled selected>Select a group</option>
+									<?php 
+
+										$groupList_sql = "SELECT product_group.ID, product_group.NAME, 							product_group.STATUS 
+
+														FROM product_group
+
+														WHERE product_group.STATUS = 1";
+
+										$groupList_result = $db->connection->query($groupList_sql);
+										$groupList_count = mysqli_num_rows($groupList_sql);
+
+										while($groupList_row = $groupList_result->fetch_array())
+										{
+											?>
+												<option value = "<?php echo $groupList_row['ID']; ?>"><?php echo $groupList_row['NAME']; ?></option>
+									  <?php
+										}
+									  ?>
+
+								  </select>
+								</div>
+								<div class="form-group">
+								  <select class="form-control" name = "RECOMMENDATION" id="updateMenuForm_RECOMMENDATION">
+									<option value="" disabled selected>Select a Recommendation</option>
+										<option value = "">None</option>
+									  	<option value = "New">New</option>
+										<option value = "Best Seller">Best Seller</option>
+										<option value = "Recommended">Recommended</option>
+								  </select>
+								</div>
+								<div class="input-group">
+									<div class="input-group-prepend">
+										<span class="input-group-text" id="inputGroup-sizing-sm">Description</span>
+									  </div>
+									  <textarea id = "updateMenuForm_DESCRIPTION" maxlength = "180" name = "DESCRIPTION" style = "padding-bottom: 150px;" type="text" class="form-control" placeholder="Description.." aria-describedby="sizing-addon2" required></textarea>
+								</div>
+								<br />
+								  <input class="img-fluid" type = "image" id = "updateMenuForm_IMAGEVIEW" width="300"></input>	
+								  <br />
+								  <button id = "updateMenuForm_BTNWANTUPDATE" type = "button" class = "btn btn-block">Want to Update the Photo?</button>
+
+								<div id = "updateMenuForm_UPDATEIMAGEDIV">
+								  <input id = "updateMenuForm_IMAGE" type = "file" accept="image/*"  name = "IMAGE" value = ""></input>
+								  <br />
+								   <small>Dimension: Width: 400 - 500 | Height: 400 - 500 | Size: 150kb maximum</small>
+									<br />
+								</div>
+								<br />
+								<div class="input-group">
+									<div class="input-group-prepend">
+										<span class="input-group-text" id="inputGroup-sizing-sm">Added by</span>
+									  </div>
+									  <input id = "updateMenuForm_ADDEDBY" name = "ADDEDBY" type="text" class="form-control" placeholder="Added by" aria-describedby="sizing-addon2" disabled>
+								</div>
+								<br />
+								<div class="form-group">
+								  <select class="form-control" name = "STATUS" id="updateMenuForm_STATUS">
+									<option value="1">Active</option>
+									<option value="0">Inactive</option>
+								  </select>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- Submission -->
+					<div class="modal-footer">
+						<button type="submit" id="updateMenuForm_SUBMIT" class="btn btn-primary" data-loading-text="Updating..."> Update</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal"></span> Close</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<!-- Delete Menu Modal -->
+	<div class="modal fade" id="deleteMenuForm_MODAL" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+           <div class="modal-header">
+				<h5>Delete Menu</h5>
+			</div>
+            <form id="deleteMenuForm" method="post" action="library/form/deleteMenuForm.php">
+                <div class="modal-body">
+                    <div><input type="text" id="deleteMenuForm_ID" name="ID" style="display: none;"></div>
+                    <p>Do you want to delete this record?:</p>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <td></td>
+                            <td><b>Menu Details</b></td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>Menu Name: </td>
+                            <td id="deleteMenuForm_NAME"></td>
+                        </tr>
+                        <tr>
+                            <td>Group: </td>
+                            <td id="deleteMenuForm_GROUP"></td>
+                        </tr>
+                        <tr>
+                            <td>Recommendation: </td>
+                            <td id="deleteMenuForm_RECOMMENDATION"></td>
+                        </tr>
+                        <tr>
+                            <td>Description: </td>
+                            <td id="deleteMenuForm_DESCRIPTION"></td>
+                        </tr>
+                       	<tr>
+								<td>Image: </td>
+								<td><image class="img-fluid" id = "deleteMenuForm_IMAGEVIEW"></image></td>
+						</tr>	
+						<tr>
+								<td>IMG Path: </td>
+								<td id = "deleteMenuForm_IMAGE"></td>
+						</tr>	
+						<tr>
+                            <td>Added By: </td>
+                            <td id="deleteMenuForm_ADDEDBY"></td>
+                        </tr>	
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+					<button type="submit" id="deleteMenuForm_SUBMIT" class="btn btn-danger" data-loading-text="Deleting..."> Delete</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal"></span> Close</button>
+                   
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Image Display Modal -->
+	 <div class="modal fade" id="displayModal_MODAL" role="dialog">
+		<div class="modal-dialog">
+		  <!-- Modal content-->
+		  <div class="modal-content">
+			<div class="modal-header">
+				<h5>Image Display</h5>
+			</div>
+			<div class="modal-body">
+				<img id = "displayModal_IMAGE" src = "" class="img-fluid">
+				<br />
+				<small id = "displayModal_IMAGESRC"></small>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			</div>
+			  </div>
+		</div>
+  	</div>
+
+  <body id="page-top">	
+
+    <!-- Navbar Section -->
+    <?php include('library/html/navbar.php'); ?>  
+
+	  
+	<!--  Manage menu Section -->
+    <section id="manageMenu" class="manage-section text-center">
+      <div class = "container">
+		  <div class = "row">
+			<div class = "col-lg-6">
+		
+			</div>
+		  	<div class = "col-lg-6">
+			  <header>
+				  <a  class = "pull-right" id="manageButton" href="#" style="vertical-align:middle; margin-bottom: 35px;" role="button" data-toggle="modal" data-target="#addMenuForm_MODAL"><span>Upload Menu</span></a>	
+					<span id = "menuSearchBar" class="input-group pull-right searchBar">
+					   <input id="menuSearch" type="text" class="form-control" placeholder="Search Menu..." />
+						   <span class="input-group-btn">
+							<button id = "searchBar" class="btn btn-primary" type="submit">
+								<i class="fas fa-search"></i>
+								</button>
+						   </span>
+					  </span>		
+				</header>
+			  </div>
+		  </div>
+		<div class = "row">
+		  <div class = "col-lg-12">
+			
+			<table class="table table-striped table-hover">
+				<thead>
+				<tr>
+					<th>Name</th>
+					<th>Group</th>
+					<th>Recommendation</th>
+					<th>Description</th>
+					<th>View Image</th>
+					<th>Status</th>
+					<th>Added By</th>
+					<th>Actions</th>
+				</tr>
+				</thead>
+				<tbody id="menuList">
+				</tbody>
+			</table>	
+			</div>
+		  </div>
+		  
+		  <div class = "row">
+		  	<div class = "col-lg-3 col-md-3 col-sm-3 col-xs-3 mx-auto">
+			  <nav aria-label="...">
+				  <ul class="pagination pagination-sm">
+					
+					 <li class="page-item">
+					  <a class="page-link <?php echo $disable_previous; ?>" style="<?php echo $disable_previous2; ?>" href="manage-menu.php?search=<?php echo $search; ?>&page=<?php echo $page - 1; ?>" tabindex="-1">Previous</a>
+					</li>
+					<?php   	
+					  	for($i = 1; $i <= $total_page; $i++)
+						{
+							?>
+					  	<li id = "paginationActive<?php echo $i; ?>" class="page-item">
+							<a class="page-link" href="manage-menu.php?search=<?php echo $search; ?>&page=<?php echo $i; ?>"><?php echo $i; ?></a>
+					    </li>
+					  
+					  <?php
+						}
+					  ?>
+					
+					<li class="page-item">
+					  <a class = "page-link <?php echo $disable_next; ?>" style="<?php echo $disable_next2; ?>" href="manage-menu.php?search=<?php echo $search; ?>&page=<?php echo $page + 1; ?>" >Next</a>
+					</li>
+				  </ul>
+				</nav>
+			  </div>
+		  </div>
+		  
+		
+		</div>
+    </section>
+	  
+	<!-- Footer Section -->
+    <?php include('library/html/footer.php'); ?>  
+	  
+    <!-- Bootstrap core JavaScript -->
+    <script src="library/jquery/jquery.min.js"></script>
+    <script src="library/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Plugin JavaScript -->
+    <script src="library/jquery-easing/jquery.easing.min.js"></script>
+	<script src="js/jquery.form.min.js"></script>
+	<script src="js/messagealert.js"></script>
+
+    <!-- Custom scripts for this template -->
+    <script src="js/grayscale.min.js"></script>
+	<script src="js/mylibrary.js"></script>
+	
+	<!-- Font Awesome CDN for mini icons-->
+	<script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
+	
+  </body>
+
+</html>
+
+<script>
+
+	  var PageComponent = {
+        menuList: document.getElementById('menuList')
+    };
+	
+	var _URL = window.URL || window.webkitURL;
+	
+	$(document).ready(function() {
+		$('#updateMenuForm_UPDATEIMAGEDIV').hide();
+		$('#updateMenuForm_BTNWANTUPDATE').click( function()
+		{
+			$(this).hide();
+			$( "#updateMenuForm_IMAGE" ).click();
+			$('#updateMenuForm_UPDATEIMAGEDIV').show();
+			
+			updateMenuForm.imageview.src = '';
+		});
+	});
+		
+	$('#addMenuForm_IMAGE').change( function(event) {
+		var file, img;
+		if ((file = this.files[0])) {
+			img = new Image();
+			img.onload = function () {
+				if(this.width < 400 || this.width > 500)
+					{
+						alert("Please adjust the width to the desirable dimension [width: 400-500]");
+						document.getElementById("addMenuForm_IMAGE").value = "";
+						$("#addMenuForm_IMAGEDISPLAY").css('display', 'none');
+					}
+				else if(this.height < 400 || this.height > 500)
+					{
+						alert("Please adjust the height to the desirable dimension [height: 400-500]");
+						document.getElementById("addMenuForm_IMAGE").value = "";
+						$("#addMenuForm_IMAGEDISPLAY").css('display', 'none');
+					}
+				else
+					{
+						$("#addMenuForm_IMAGEDISPLAY").fadeIn("fast").attr('src',URL.createObjectURL(event.target.files[0]));
+					}
+				
+			};
+			img.src = _URL.createObjectURL(file);
+		}
+		
+	});
+	
+	$('#updateMenuForm_IMAGE').change( function(event) {
+		var file, img;
+		if ((file = this.files[0])) {
+			img = new Image();
+			img.onload = function () {
+				if(this.width < 400 || this.width > 500)
+					{
+						alert("Please adjust the width to the desirable dimension [width: 400-500]");
+						document.getElementById("updateMenuForm_IMAGE").value = "";
+						$("#updateMenuForm_IMAGEVIEW").css('display', 'none');
+					}
+				else if(this.height < 400 || this.height > 500)
+					{
+						alert("Please adjust the height to the desirable dimension [height: 400-500]");
+						document.getElementById("updateMenuForm_IMAGE").value = "";
+						$("#updateMenuForm_IMAGEVIEW").css('display', 'none');
+					}
+				else
+					{
+						$("#updateMenuForm_IMAGEVIEW").fadeIn("fast").attr('src',URL.createObjectURL(event.target.files[0]));
+					}
+				
+			};
+			img.src = _URL.createObjectURL(file);
+		}
+		
+	});
+	
+	$(document).ready(function(){
+		$("#paginationActive<?php echo $page ?>").addClass("active");
+		$("#menuSearch").val('<?php echo $search; ?>');
+		$("#menuSearch").click(function(){
+			this.value = '';
+			 $( "#searchBar" ).click(function() {
+			  jQuery('#menuSearch').empty();
+			  var searchValue = $("#menuSearch").val().toLowerCase(); 
+				window.location.href='manage-menu.php?search='+searchValue;
+				 
+				});
+
+				$('#menuSearch').keypress(function(e){
+				if(e.which == 13){//Enter key pressed
+					$('#searchBar').click();//Trigger search button click event
+				}
+			});
+		});
+	});
+	
+	
+	function fillDisplayModal(id)
+	{
+		var image = document.getElementById('menu_IMAGE_'+id).innerHTML;
+		
+		document.getElementById('displayModal_IMAGESRC').innerHTML = "Image source: "+image;
+		document.getElementById("displayModal_IMAGE").src = "img/menu/"+image;
+		$("#displayModal_MODAL").modal('show');
+	}
+	
+	
+	// Add Menu 
+	
+	var addMenuForm = {
+        form: document.getElementById('addMenuForm'),
+		modal: document.getElementById('addMenuForm_MODAL'),
+        name: document.getElementById('addMenuForm_NAME'),
+		group: document.getElementById('addMenuForm_GROUP'),
+		recommendation: document.getElementById('addMenuForm_RECOMMENDATION'),
+		image: document.getElementById('addMenuForm_IMAGE'),
+		imageview: document.getElementById('addMenuForm_IMAGEDISPLAY'),
+		description: document.getElementById('addMenuForm_DESCRIPTION'),
+        address: document.getElementById('AddEvacuationForm_ADDRESS'),
+        submit: '#addMenuForm_SUBMIT',
+        modal: '#addMenuForm_MODAL'
+    };
+	
+	
+	addMenuForm.form.onsubmit = function (e)
+	{
+		e.preventDefault();
+		$(this).ajaxSubmit({
+			beforeSend:function()
+			{
+				$(addMenuForm.submit).button('loading');
+			},
+			
+			uploadProgress:function(event,position,total,percentComplete)
+			{
+				
+			},
+			success:function(data)
+			{
+				$(addMenuForm.submit).button('reset');
+				var server_message = data.trim();
+				if(!isWhitespace(GetSuccessMsg(server_message)))
+					{
+						var id;
+						var imageurl;
+						var message = GetSuccessMsg(server_message);
+						
+						for(var i = 0; i < message.length; i++)
+							{
+								if(message.charAt(i) == ',')
+									{
+										$(addMenuForm.modal).modal('hide');
+										alert('Added Succesfully');
+										id = message.substring(0, i);
+										imageurl = message.substring(i+1,message.length);
+										
+										addMenuList(id, addMenuForm.name.value, addMenuForm.description.value, imageurl, 'Active', addMenuForm.group.options[addMenuForm.group.selectedIndex].text, "<?php echo $session_USER_FULLNAME; ?>", addMenuForm.recommendation.options[addMenuForm.recommendation.selectedIndex].text)
+										
+										addMenuForm.form.reset();
+										addMenuForm.imageview.src = '';
+									}
+							}
+					}
+				else if(!isWhitespace(GetWarningMsg(server_message)))
+					{
+						alert(GetWarningMsg(server_message));
+					}
+				else if(!isWhitespace(GetErrorMsg(server_message)))
+					{
+						alert(GetErrorMsg(server_message));
+					}
+				else if(!isWhitespace(GetServerMsg(server_message)))
+					{
+						alert(GetServerMsg(server_message));
+					}
+				else
+					{
+						alert('Oh Snap! There is a problem with the server or your connection.');
+					}
+				}
+			});
+		};
+	
+	// Delete Menu
+	
+	 var deleteMenuForm = {
+        form: document.getElementById('deleteMenuForm'),
+        modal: document.getElementById('deleteMenuForm_MODAL'),
+        id: document.getElementById('deleteMenuForm_ID'),
+        name: document.getElementById('deleteMenuForm_NAME'),
+        group: document.getElementById('deleteMenuForm_GROUP'),
+        recommendation: document.getElementById('deleteMenuForm_RECOMMENDATION'),
+        description: document.getElementById('deleteMenuForm_DESCRIPTION'),
+        image: document.getElementById('deleteMenuForm_IMAGE'),
+		imageview: document.getElementById('deleteMenuForm_IMAGEVIEW'),
+        addedby: document.getElementById('deleteMenuForm_ADDEDBY'),
+		msgbox: 'deleteMenuForm_msgbox',
+        submit: document.getElementById('deleteMenuForm_SUBMIT')
+    };
+	
+	
+	
+	$(deleteMenuForm.form).on('submit', function (e) {
+        var id = deleteMenuForm.id.value;
+
+        e.preventDefault();
+        $(this).ajaxSubmit({
+            beforeSend:function()
+            {
+                $(deleteMenuForm.submit).button('loading');
+            },
+            uploadProgress:function(event,position,total,percentCompelete)
+            {
+
+            },
+            success:function(data)
+            {
+                $(deleteMenuForm.submit).button('reset');
+				deleteMenu(id);
+				deleteMenuForm.form.reset();
+				$(deleteMenuForm.modal).modal('hide');
+				alert('Succesfully Deleted');
+            }
+        });
+    });
+	
+	function deleteMenu(id) {
+        $('#menu_' + id).remove();
+    }
+
+    function openDeleteMenuModal(id) {
+		var imageLink = document.getElementById('menu_IMAGE_'+id).innerHTML;
+		 
+        deleteMenuForm.id.value = id;
+        deleteMenuForm.name.innerHTML = document.getElementById('menu_NAME_' + id).innerHTML;
+        deleteMenuForm.group.innerHTML = document.getElementById('menu_GROUP_' + id).innerHTML;
+        deleteMenuForm.recommendation.innerHTML = document.getElementById('menu_RECOMMENDATION_' + id).innerHTML;
+        deleteMenuForm.description.innerHTML = document.getElementById('menu_DESCRIPTION_' + id).innerHTML;
+        deleteMenuForm.image.innerHTML = document.getElementById('menu_IMAGE_' + id).innerHTML;
+		deleteMenuForm.addedby.innerHTML = document.getElementById('menu_ACCOUNTNAME_' + id).innerHTML;
+		deleteMenuForm.imageview.src = "img/menu/"+imageLink;
+
+        $(deleteMenuForm.modal).modal('show');
+    }
+	
+	
+	// UPDATE MENU FORM
+	
+	var updateMenuForm = {
+		form: document.getElementById('updateMenuForm'),
+		modal: document.getElementById('updateMenuForm_MODAL'),
+		id: document.getElementById('updateMenuForm_ID'),
+		name: document.getElementById('updateMenuForm_NAME'),
+		group: document.getElementById('updateMenuForm_GROUP'),
+		recommendation: document.getElementById('updateMenuForm_RECOMMENDATION'),
+		description: document.getElementById('updateMenuForm_DESCRIPTION'),
+		image: document.getElementById('updateMenuForm_IMAGE'),
+		imageview: document.getElementById('updateMenuForm_IMAGEVIEW'),
+		status: document.getElementById('updateMenuForm_STATUS'),
+		addedby: document.getElementById('updateMenuForm_ADDEDBY'),
+		submit : '#updateMenuForm_SUBMIT'
+
+	};
+	
+	function updateMenuFill(id) {
+		// image fill
+		var name = document.getElementById('menu_NAME_' + id).innerHTML;
+		var group = document.getElementById('menu_GROUP_' + id).innerHTML;
+		var recommendation = document.getElementById('menu_RECOMMENDATION_'+id).innerHTML;
+		var description = document.getElementById('menu_DESCRIPTION_'+id).innerHTML;
+		var image = document.getElementById('menu_IMAGE_'+id).innerHTML;
+		var status = document.getElementById('menu_STATUS_'+id).innerHTML;
+		var addedby = document.getElementById('menu_ACCOUNTNAME_'+id).innerHTML;
+		
+		for(var i = 0; i < updateMenuForm.group.options.length; i ++)
+			{
+				if(updateMenuForm.group.options[i].text == group)
+					{
+						updateMenuForm.group.selectedIndex = i;
+					}
+			}
+		
+		for(var i = 0; i < updateMenuForm.status.options.length; i++)
+			{
+				if(updateMenuForm.status.options[i].text == status)
+					{
+						updateMenuForm.status.selectedIndex = i;
+					}
+			}
+		for(var i = 0; i < updateMenuForm.recommendation.options.length; i++)
+			{
+				if(updateMenuForm.recommendation.options[i].text == recommendation)
+					{
+						updateMenuForm.recommendation.selectedIndex = i;
+					}
+			}
+		
+		updateMenuForm.name.value = name;
+		updateMenuForm.description.value = description;
+		updateMenuForm.id.value = id;
+		updateMenuForm.addedby.value = addedby;
+		updateMenuForm.imageview.src = "img/menu/"+image;
+	}
+	
+	function updateMenu(id, name, group, recommendation, image, description, status)
+	{
+		document.getElementById('menu_NAME_'+id).innerHTML = name;
+		document.getElementById('menu_GROUP_'+id).innerHTML = group;
+		document.getElementById('menu_RECOMMENDATION_'+id).innerHTML = recommendation;
+		document.getElementById('menu_IMAGE_'+id).innerHTML = image;
+		document.getElementById('menu_DESCRIPTION_'+id).innerHTML = description;
+		document.getElementById('menu_STATUS_'+id).innerHTML = status;
+		// image add here
+		updateMenuForm.form.reset();
+	}
+	
+	
+	updateMenuForm.form.onsubmit = function(e) {
+		e.preventDefault();
+		
+		$(this).ajaxSubmit({
+			beforeSend:function()
+			{
+				$(updateMenuForm.submit).button('loading');
+			},
+			uploadProgress:function(event,position,total,percentCompelete)
+			{
+
+			},
+			success:function(data)
+			{
+				$(updateMenuForm.submit).button('reset');
+				var server_message = data.trim();
+				
+				if(!isWhitespace(GetSuccessMsg(server_message)))
+				{
+					var id;
+					var imageurl;
+					var message = GetSuccessMsg(server_message);
+					for(var i = 0; i < message.length; i++)
+						{
+							if(message.charAt(i) == ',')
+								{
+									$(updateMenuForm.modal).modal('hide');
+									alert('Succesfully Updated');
+									id = message.substring(0, i);
+									imageurl = message.substring(i+1,message.length);
+
+									updateMenu(id,updateMenuForm.name.value, updateMenuForm.group.options[updateMenuForm.group.selectedIndex].text, updateMenuForm.recommendation.options[updateMenuForm.recommendation.selectedIndex].value, imageurl, updateMenuForm.description.value, updateMenuForm.status.options[updateMenuForm.status.selectedIndex].text);
+								}
+						}
+					
+					
+					
+				
+					// add image here
+				}
+				else if(!isWhitespace(GetWarningMsg(server_message)))
+				{
+					
+				}
+				else if(!isWhitespace(GetErrorMsg(server_message)))
+				{
+					alert(GetErrorMsg(server_message));
+				}
+				else if(!isWhitespace(GetServerMsg(server_message)))
+				{
+					
+				}
+				else
+				{
+					alert('Oh Snap! There is a problem with the server or your connection');
+				
+				}
+			}
+		});
+	};
+	
+	
+	
+	function addMenuList(id, name, descript, image, status, groupname, accountname, recommendation) {
+        PageComponent.menuList.innerHTML = PageComponent.menuList.innerHTML +
+			'<tr>' +
+			'<tr id="menu_' + id + '">'+
+            '   <td id="menu_NAME_' + id + '">' + name + '</td>'+
+			'   <td id="menu_GROUP_' + id + '">' + groupname +'</td>'+
+			'   <td id="menu_RECOMMENDATION_' + id + '">'+ recommendation +'</td>'+
+			'   <td id="menu_DESCRIPTION_' + id + '">' + descript + '</td>'+
+			'   <td id="menu_IMAGE_' + id + '" style = "display: none;">' + image + '</td>'+
+			'<td><button role="button" class="btn btn-primary" onclick="fillDisplayModal(' + id + ')"><i class="fas fa-eye"></i></button></td>'+
+			'   <td id="menu_STATUS_' + id + '">' + status + '</td>'+
+			'   <td id="menu_ACCOUNTNAME_' + id + '">' + accountname +'</td>'+
+			'   <td><span><button id="menu_BTNUPDATE_' + id + '" value="' + id + '" data-target = "#updateMenuForm_MODAL" data-toggle = "modal" onclick = "updateMenuFill(\'' + id + '\')"class="btn btn-primary"><i class="fas fa-edit"></i></button><button id="menu_BTNDELETE_' + id + '" value="' + id + '" class="btn btn-warning" role = "button" onclick="openDeleteMenuModal(' + id + ')"><i class="fas fa-trash"></i></button></span></td>'+
+            '<tr>';
+    }
+	
+	<?php
+		
+		$list_sql = 'SELECT product_item.ID AS MENUID, product_item.NAME, product_item.DESCRIPTION, product_item.IMAGE, product_item.STATUS as PRODUCTSTATUS, product_item.RECOMMENDATION AS RECOMMENDATIONNAME, product_group.ID, product_group.NAME AS GROUPNAME, product_group.STATUS, account_user.USERNAME, CONCAT(account_user.FNAME, " ", account_user.MNAME, " ", account_user.LNAME) AS ACCOUNTNAME
+                                    
+                                    
+                                    FROM product_group
+                                    INNER JOIN product_item
+                                    ON product_item.GROUPID = product_group.ID
+                                    INNER JOIN account_user
+                                    ON product_item.ADDEDBY = account_user.ID
+                                   	WHERE product_item.NAME LIKE "%'.$search.'%"
+                                   
+                                    ORDER BY product_item.NAME
+									LIMIT ' .$limit.'
+									OFFSET '.$offset;
+		$list_result = $db->connection->query($list_sql);
+		$list_count = mysqli_num_rows($list_result);
+
+		if($list_count < 1) {
+			?> 
+				var content = '<tr>'+
+					'<tr>'+
+					'	<td id = "news_TITLE_">No Menu Found</td>'+
+					'<tr>';
+				
+				$("#menuList").append(content);
+			<?php
+		}
+		else {
+			while ($list_row = $list_result->fetch_assoc()) {
+				$result_ID = htmlspecialchars($list_row['MENUID']);
+				$result_NAME = htmlspecialchars($list_row['NAME']);
+				$result_DESCRIPTION = htmlspecialchars($list_row['DESCRIPTION']);
+				$result_GROUPNAME = htmlspecialchars($list_row['GROUPNAME']);
+				$result_ACCOUNTNAME = htmlspecialchars($list_row['ACCOUNTNAME']);
+				$result_STATUS = htmlspecialchars($list_row['PRODUCTSTATUS']);
+				$result_RECOMMENDATION = htmlspecialchars($list_row['RECOMMENDATIONNAME']);
+				$result_IMAGE = htmlspecialchars($list_row['IMAGE']);
+				
+			if($result_STATUS == '1')
+			{
+				$result_STATUS = 'Active';
+			}
+			else
+			{
+				$result_STATUS = 'Inactive';
+			}
+		?>
+
+		addMenuList("<?php echo $result_ID; ?>","<?php echo $result_NAME; ?>","<?php echo $result_DESCRIPTION; ?>","<?php echo $result_IMAGE; ?>","<?php echo $result_STATUS; ?>","<?php echo $result_GROUPNAME; ?>","<?php echo $result_ACCOUNTNAME; ?>","<?php echo $result_RECOMMENDATION; ?>");
+
+		<?php
+			}
+		}
+	?>
+	
+	
+</script>
+	
+
+	SELECT  
+
+	ClassScheduleData.idClassScheduleData,  
+	ClassScheduleControl.idUser, 
+	ClassScheduleControl.idSchoolYear, 
+	ClassScheduleControl.CSCStubcode,  
+	Subjects.SName, 
+	Subjects.SCredit,
+	ClassScheduleData.CSDTime, ClassScheduleData.CSDDay, Rooms.RName,  Employee.EMPFirstName, Employee.EMPLastName, Employee.EMPMiddleName FROM ClassScheduleControl 
+    INNER JOIN ClassScheduleData ON ClassScheduleControl.idClassScheduleData = ClassScheduleData.idClassScheduleData INNER JOIN Rooms ON ClassScheduleData.idRoom = Rooms.idRoom INNER JOIN
+    Subjects ON Subjects.idSubject = ClassScheduleData.idSubject INNER JOIN Employee ON Employee.idEmployee = Employee.idEmployee
+    WHERE ClassScheduleControl.idUser = 1  ORDER BY ClassScheduleControl.CSCStubCode
+<?php
+
+	session_start();
+	include('library/form/connection.php');
+	include('library/functions/functions.php');
+	$db = new db();
+
+	if(isset($_SESSION['USER_USERNAME']))
+	{
+				
+	}
+	else {
+		echo '<html style="awidth: 100%; height: 100%; margin: 0px; padding: 0px;"> <head> <title>Page not Availble</title><link rel="icon" href="img/favicon.ico"></head> <body style="width: 100%; height: 100%; margin: 0px; padding: 0px; text-align: center; background-color: #454551; color: lightgray;"> <div style="width: 100%; height: 100%; margin: 0px; padding: 0px; vertical-align: middle; display: table;"> <div style="width: 100%; height: 100%; margin: 0px; padding: 0px; vertical-align: middle; display: table-cell;"> 
+
+            <h1><a href = "https://www.google.com.ph/search?q=get+a+life&rlz=1C1GCEA_enPH782PH782&oq=get+a+life&aqs=chrome..69i57.1191j0j1&sourceid=chrome&ie=UTF-8" style = "font-size: 50px; color: lightgray; text-decoration:none;"> 403 Forbidden</a></h1> <h4>Un-authorized Access</h4> </div> </div> </body> </html>';
+        exit;
+	}
+
+	$search = isset($_GET['search']) ? $_GET['search'] : '';
+	$limit = 10;
+
+	$total_sql = "SELECT * FROM ClassScheduleControl WHERE CSCGrade IS NOT NULL";
+	$getResult = $db->connection->prepare($total_sql);
+	$getResult->execute();
+	$total_count = $getResult->RowCount();
+	$result = $getResult->fetchAll();
+	$total_page = ceil($total_count/$limit);
+
+	$page = isset($_GET['page']) && $_GET['page'] > 0 && $_GET['page'] <= $total_page ? $_GET['page'] : '1';
+	$offset = ($page * $limit) - $limit;
+
+	if($page < 2) {
+		$disable_previous = 'disabled';
+		$disable_previous2 = 'pointer-events: none;';
+		$bottom_page = 'display:none';
+	}
+	else {
+		$disable_previous = '';
+		$disable_previous2 = '';
+		$bottom_page = '';
+	}
+	if($total_page < 2) {
+		$top_page = 'display:none';
+	}
+	else {
+		$top_page = '';
+	}
+	if($total_page == $page || $total_page < 1) {
+		$disable_next = 'disabled';
+		$disable_next2 = 'pointer-events: none;';
+		$top_page = 'display:none';
+	}
+	else {
+		$disable_next = '';
+		$disable_next2 = '';
+		$top_page = '';
+	}
+
+?>
+
+
+<!doctype html>
+<html>
+	
+	<head>
+	
+		<meta charset="utf-8">
+
+		<title>CPU Smart Touch Information Kiosk</title>
+
+		<link href = "library/css/bootstrap.min.css" rel = " stylesheet">
+		<link href = "library/css/mystyles.css" rel = "stylesheet">
+		
+		
+	</head>
+
+<body>
+	
+	
+
+	<div class="container">
+			<div class = "row top-buffer">
+				<div class = "col-lg-6">
+					<h1 class = "h1">Grades Management</h1>
+					<p class = "text-muted">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc non mauris vitae dui lacinia cursus eget eu urna.</p>
+				</div>
+				
+				<div class = "col-lg-6">
+					<div class = "float-right button-manage-group">
+						<a href = "dms.php" class="btn btn-info"><i class="fas fa-arrow-left"></i>&nbsp; Return</a>
+						<button class="btn btn-secondary" data-toggle="modal" data-target="#exampleModal"><i class="fas fa-download"></i>&nbsp; Load Grades</button>
+					</div>
+				</div>
+				
+		</div>
+		
+		<div class = "row">
+			<div class = "col-lg-12">
+						<hr class="my-4 float-right" width="65%">
+			</div>
+			<div class = "col-lg-8">
+			</div>
+			<div class = "col-lg-4">
+				<div class = "input-group">
+				<input type = "text" class = "form-control" placeholder="Search">
+				&nbsp;
+				<button class = "btn btn-success">Search</button>
+				</div>
+			</div>
+		</div>
+		<div class = "row top-buffer">
+
+			<table class="table table-striped table-hover">
+						<thead>
+						<tr>
+							<th>Class Schedule ID</th>
+							<th>Fullname</th>
+							<th>Subject</th>
+							<th>Grade</th>
+							<th>Credit</th>
+							<th>Remarks</th>
+							<th>Status</th>
+							<th>Actions</th>
+						</tr>
+						</thead>
+						<tbody id="menuList">
+						</tbody>
+					</table>	
+					</div>
+				  </div>
+
+		  	<table class="table table-striped">
+				  <thead>
+					<tr>
+					  <th scope="col">Class Schedule ID</th>
+					  <th scope="col">Fullname</th>
+					  <th scope="col">Subject</th>
+					  <th scope="col">Grade</th>
+					  <th scope="col">Credit</th>
+					  <th scope="col">Remarks</th>
+					  <th scope="col">Actions</th>					  
+					</tr>
+				  </thead>
+				  <tbody id = "gradeList">
+					<tr>
+					  <th scope="row">14338017</th>
+					  <td>Paul Manares</td>
+					  <td>English 201</td>
+					  <td>2.0</td>
+				  	  <td>3.0</td>
+				  	  <td>Passed</td>				  
+					  <td><a href = "#" class = "btn btn-primary">Update</a></td>
+					</tr>
+					<tr>
+					  <th scope="row">14338017</th>
+					  <td>Paul Manares</td>
+					  <td>English 201</td>
+					  <td>2.0</td>
+				  	  <td>3.0</td>
+				  	  <td>Passed</td>				  
+					  <td><a href = "#" class = "btn btn-primary">Update</a></td>
+					</tr>
+					<tr>
+					  <th scope="row">14338017</th>
+					  <td>Paul Manares</td>
+					  <td>English 201</td>
+					  <td>2.0</td>
+				  	  <td>3.0</td>
+				  	  <td>Passed</td>				  
+					  <td><a href = "#" class = "btn btn-primary">Update</a></td>
+					</tr>
+				  </tbody>
+				</table>
+			
+		</div>
+
+		<div class = "row top-buffer justify-content-md-center">
+			 <div class="col-md-auto top-buffer">
+		<nav aria-label="Page navigation example">
+			  <ul class="pagination justify-content-center">
+			    <li class="page-item disabled">
+			      <a class="page-link" href="#" tabindex="-1">Previous</a>
+			    </li>
+			    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+			    <li class="page-item"><a class="page-link" href="#">2</a></li>
+			    <li class="page-item"><a class="page-link" href="#">3</a></li>
+			    <li class="page-item">
+			      <a class="page-link" href="#">Next</a>
+			    </li>
+			  </ul>
+			</nav>
+		</div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	        ...
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+	        <button type="button" class="btn btn-primary">Save changes</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+		 
+	
+	
+	<script src = "library/js/bootstrap.min.js"></script>
+			<!-- Font Awesome CDN for mini icons-->
+	<script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
+</body>
+	
+	
+</html> 
+
+<script>
+
+
+
+function addGradeList(id, firstname, middlename, lastname, subject, grade, credit, credit, status)
+{
+	PageComponent.gradeList.innerHTML = PageComponent.gradeList.innerHTML +
+		""
+
+}
+
+
+
+<?php 
+
+	$list_sql = 'SELECT ClassScheduleControl.idClassScheduleControl, ClassScheduleData.idClassScheduleData, Subjects.SName, Subjects.SCredit, ClassScheduleControl.CSCGrade, ClassScheduleControl.CSCRemarks, Users.UFirstName, Users.UMiddleName, Users.ULastName, ClassScheduleControl.CSCStatus
+		FROM ClassScheduleControl 
+		INNER JOIN ClassScheduleData
+		ON ClassScheduleControl.idClassScheduleData = ClassScheduleData.idClassScheduleData
+		INNER JOIN Subjects
+		ON Subjects.idSubject = ClassScheduleData.idSubject
+		INNER JOIN Users
+		ON Users.idUser = ClassScheduleControl.idUser';
+	
+	$list_getResult = $db->connection->prepare($list_sql);
+	$list_getResult->execute();
+	$list_count = $getResult->RowCount();
+
+	if($count < 0){
+		?>
+			var content = '<tr>'+
+			'<tr>'+
+			'<td id = "grades_TITLE_">No Menu Found</td>'+
+			'<tr>';
+
+			$("gradeslist").append(content);
+		<?php
+	}
+	else
+	{
+		while($list_row = $result = $getResult->fetchAll())
+		{
+			$result_ID = htmlspecialchars($list_row['idClassScheduleControl']); 
+			$result_FIRSTNAME = htmlspecialchars($list_row['UFirstName']);
+			$result_MIDDLENAME = htmlspecialchars($list_row['UMiddleName']);
+			$result_LASTNAME = htmlspecialchars($list_row['ULastName']);
+			$result_SUBJECT = htmlspecialchars($list_row['SName']);
+			$result_GRADE = htmlspecialchars($list_row['CSCGrade']);
+			$result_CREDIT = htmlspecialchars($list_row['SCredit']);
+			$result_REMARKS = htmlspecialchars($list_row['CSCRemarks']);
+			$result_STATUS = htmlspecialchars($list_Row['CSCStatus']);
+		if($result_STATUS == '1')
+		{
+			$result_STATUS = 'Active';
+		}
+		else
+		{
+			$result_STATUS = 'Inactive';
+		}
+	?>
+
+	addGradeList("<?php echo $result_ID; ?>","<?php echo $result_FIRSTNAME; ?>","<?php echo $result_MIDDLENAME; ?>", "<?php echo $result_LASTNAME; ?>","<?php echo $result_SUBJECT; ?>" ,"<?php echo $result_GRADE; ?>","<?php echo $result_CREDIT; ?>", "<?php echo $result_REMARKS; ?>","<?php echo $result_STATUS; ?>");
+		
+		<?php 
+		}			
+
+
+	}
+	?>
+	</script>
+
+	
+				<div id = "loginForm_msgbox" tabindex="0" style = "color: black"></div>
+					<input type ="text" name = "USERNAME" id = "loginForm_USERNAME" class="form-control" placeholder="Username" required>
+					<input type ="password" name = "PASSWORD" id = "loginForm_PASSWORD" class="form-control" placeholder="Password" required>
+					<span class = "pull-right">
+						<br>
+					
+					</span>
+			</form>
