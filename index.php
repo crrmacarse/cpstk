@@ -50,8 +50,8 @@
 
 	</div>
 	
-		<div id = "footer" class = "row justify-content-md-center top-buffer" >
-		<div class = "col-md-auto">
+		<div id = "footer" class = "row justify-content-center top-buffer" >
+		<div class = "col-auto">
 			<small class = "text-muted">Copyright Fourty Six &copy;<br>All Rights Reserved 2018&trade;</small>
 		</div>
 		</div>
